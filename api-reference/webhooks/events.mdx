@@ -1,0 +1,183 @@
+---
+title: "Webhook events"
+description: "Event types, headers, and payloads sent to your configured webhook URL."
+---
+
+## Overview
+
+Blooio sends POST requests to your configured webhook URL for message lifecycle events.
+
+### Headers
+
+- **Content-Type**: `application/json`
+- **X-Blooio-Event**: Event type (e.g., `message.sent`)
+- **X-Blooio-Message-Id**: Associated message ID
+
+### Base fields
+
+<ResponseField name="event" type="string" required>
+One of: `message.received`, `message.sent`, `message.delivered`, `message.failed`, `message.read`.
+</ResponseField>
+
+<ResponseField name="message_id" type="string" required>
+Unique identifier for the message.
+</ResponseField>
+
+<ResponseField name="external_id" type="string" required>
+Phone number or email.
+</ResponseField>
+
+<ResponseField name="protocol" type="string" required>
+One of: `imessage`, `sms`, `rcs`, `non-imessage`.
+</ResponseField>
+
+<ResponseField name="timestamp" type="integer" required>
+Unix timestamp (ms) when the webhook was sent.
+</ResponseField>
+
+<ResponseField name="device_id" type="string" required>
+Hashed device identifier that handled the event.
+</ResponseField>
+
+---
+
+## message.received
+
+<ResponseField name="text" type="string" required>
+Text content of the inbound message.
+</ResponseField>
+
+<ResponseField name="attachments" type="array[string]" required>
+Attachment URLs included in the message.
+</ResponseField>
+
+<ResponseField name="received_at" type="integer" required>
+Unix timestamp (ms) when the device received the message.
+</ResponseField>
+
+<ResponseExample>
+```json Example
+{
+  "event": "message.received",
+  "message_id": "CZIsqG9ZWd9gwjIEhZpHY",
+  "external_id": "+15551234567",
+  "text": "Hello, I need help with my order",
+  "attachments": [],
+  "protocol": "imessage",
+  "timestamp": 1703123457474,
+  "device_id": "A1B2C3D4",
+  "received_at": 1703123456789
+}
+```
+</ResponseExample>
+
+---
+
+## message.sent
+
+Text variant includes `text`; attachment variant includes `attachments`.
+
+<ResponseExample>
+```json Text variant
+{
+  "event": "message.sent",
+  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+  "external_id": "+15551234567",
+  "protocol": "imessage",
+  "timestamp": 1703123458158,
+  "text": "Thanks for contacting us! How can I help?",
+  "device_id": "A1B2C3D4",
+  "sent_at": 1703123457370
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json Attachment variant
+{
+  "event": "message.sent",
+  "message_id": "hL3Jh_YHR3N7VlThNU0GL",
+  "external_id": "+15551234567",
+  "protocol": "imessage",
+  "timestamp": 1703123459200,
+  "attachments": [
+    "https://cdn.example.com/product-image.jpg"
+  ],
+  "device_id": "A1B2C3D4",
+  "sent_at": 1703123458900
+}
+```
+</ResponseExample>
+
+---
+
+## message.delivered
+
+<ResponseField name="delivered_at" type="integer" required>
+Unix timestamp (ms) when the message was delivered.
+</ResponseField>
+
+<ResponseExample>
+```json Example
+{
+  "event": "message.delivered",
+  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+  "external_id": "+15551234567",
+  "protocol": "imessage",
+  "timestamp": 1703123460773,
+  "device_id": "A1B2C3D4",
+  "delivered_at": 1703123457563
+}
+```
+</ResponseExample>
+
+---
+
+## message.failed
+
+<ResponseField name="error_code" type="string" required>
+Error code indicating the type of failure.
+</ResponseField>
+
+<ResponseField name="error_message" type="string" required>
+Human-readable error message.
+</ResponseField>
+
+<ResponseExample>
+```json Example
+{
+  "event": "message.failed",
+  "message_id": "jkl012_failed_msg",
+  "external_id": "+15551234567",
+  "protocol": "sms",
+  "timestamp": 1703123467000,
+  "device_id": "A1B2C3D4",
+  "error_code": "delivery_timeout",
+  "error_message": "Delivery timeout"
+}
+```
+</ResponseExample>
+
+---
+
+## message.read
+
+<ResponseField name="read_at" type="integer" required>
+Unix timestamp (ms) when the message was read. iMessage only, recipient must have read receipts enabled.
+</ResponseField>
+
+<ResponseExample>
+```json Example
+{
+  "event": "message.read",
+  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+  "external_id": "+15551234567",
+  "protocol": "imessage",
+  "timestamp": 1703123469000,
+  "device_id": "A1B2C3D4",
+  "read_at": 1703123468402
+}
+```
+</ResponseExample>
+
+

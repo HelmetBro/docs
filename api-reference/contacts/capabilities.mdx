@@ -1,0 +1,73 @@
+---
+title: "Check contact capabilities"
+description: "Determine whether a phone number or email supports iMessage and SMS."
+---
+
+## GET /v1/api/contacts/{contact}/capabilities
+
+### Path parameters
+
+<ParamField path="contact" type="string" required>
+Phone number in E.164 format (e.g., +1234567890) or email address.
+</ParamField>
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+### Example requests
+
+<RequestExample>
+```bash cURL (phone)
+curl -X GET 'https://edge.blooio.com/v1/api/contacts/%2B1234567890/capabilities' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```bash cURL (email)
+curl -X GET 'https://edge.blooio.com/v1/api/contacts/user@icloud.com/capabilities' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/contacts/%2B1234567890/capabilities', {
+  headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+});
+const data = await res.json();
+```
+</RequestExample>
+
+### Response
+
+<ResponseExample>
+```json 200 OK
+{
+  "contact": "+1234567890",
+  "type": "phone",
+  "capabilities": {
+    "imessage": true,
+    "sms": true
+  },
+  "lastChecked": "2024-01-01T00:00:00.000Z"
+}
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 400 Bad Request
+{ "error": "bad_request", "message": "Invalid contact identifier", "status": 400 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+

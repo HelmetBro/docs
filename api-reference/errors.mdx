@@ -1,0 +1,60 @@
+---
+title: "Errors"
+description: "Standard error format and common error cases returned by the API."
+---
+
+## Error schema
+
+All error responses follow the same structure.
+
+<ResponseField name="error" type="string" required>
+Short machine-readable error identifier.
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+Human-readable explanation.
+</ResponseField>
+
+<ResponseField name="status" type="integer" required>
+HTTP status code.
+</ResponseField>
+
+### Examples
+
+<ResponseExample>
+```json 400 Bad Request
+{ "error": "bad_request", "message": "Invalid request parameters.", "status": 400 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key.", "status": 401 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 403 Forbidden
+{ "error": "forbidden", "message": "Action not allowed for this API key.", "status": 403 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 404 Not Found
+{ "error": "not_found", "message": "Resource not found.", "status": 404 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 409 Conflict
+{ "error": "conflict", "message": "Conflict with current state.", "status": 409 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 503 Service Unavailable
+{ "error": "service_unavailable", "message": "No active devices available.", "status": 503 }
+```
+</ResponseExample>
+
+

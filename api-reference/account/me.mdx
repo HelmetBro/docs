@@ -1,0 +1,66 @@
+---
+title: "Get API key details"
+description: "Validate your API key and retrieve plan, devices, usage, and integration details."
+---
+
+## GET /v1/api/me
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+### Example request
+
+<RequestExample>
+```bash cURL
+curl -X GET 'https://edge.blooio.com/v1/api/me' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/me', {
+  headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+});
+const data = await res.json();
+```
+</RequestExample>
+
+### Response
+
+<ResponseExample>
+```json 200 OK
+{
+  "valid": true,
+  "api_key": "VTAsewjhLz4KUcf3rt8tu",
+  "plan": "trial",
+  "metadata": {},
+  "integration_details": {
+    "name": "My Workspace",
+    "customer_webhook_url": "https://example.com/mywebhook",
+    "metadata": {}
+  },
+  "devices": [
+    { "device_hash": "A1B2C3D4", "is_active": true, "last_active": 1703123457370 }
+  ],
+  "usage": {
+    "inbound_messages": 42,
+    "outbound_messages": 156,
+    "last_message_sent": 1703123458000
+  }
+}
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+

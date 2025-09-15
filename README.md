@@ -1,44 +1,31 @@
-# Mintlify Starter Kit
+# Blooio Messaging API Docs
 
-Use the starter kit to get your docs deployed and ready to customize.
+This repository contains the documentation for the Blooio Messaging API (v3). The site is built with Mintlify and documents all endpoints, webhooks, and usage guides.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Local development
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
-
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+Install the Mintlify CLI to preview changes locally:
 
 ```
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Start the dev server from the repository root (where `docs.json` lives):
 
 ```
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+Open `http://localhost:3000` to view the docs.
 
-## Publishing changes
+## Structure
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+- `api-reference/` — Endpoints, webhooks, and errors
+- `index.mdx` — Homepage
+- `quickstart.mdx` — Send your first message and set up webhooks
+- `docs.json` — Navigation, theme, and site configuration
 
-## Need help?
+## Contributing
 
-### Troubleshooting
+Open a PR for updates or fixes. Ensure examples are accurate and tested. Do not include secrets in code samples.
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
-- [Mintlify community](https://mintlify.com/community)

@@ -1,0 +1,118 @@
+---
+title: "Manage webhook URL"
+description: "Set and retrieve your webhook URL for receiving message event notifications."
+---
+
+## PUT /v1/api/config/webhook
+
+Update the webhook URL that will receive message events.
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+### Request body
+
+<ParamField body="webhook_url" type="string" required>
+HTTPS URL that will receive POST requests for message events.
+</ParamField>
+
+### Example request
+
+<RequestExample>
+```bash cURL
+curl -X PUT 'https://edge.blooio.com/v1/api/config/webhook' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "webhook_url": "https://example.com/mywebhook" }'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/config/webhook', {
+  method: 'PUT',
+  headers: {
+    'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ webhook_url: 'https://example.com/mywebhook' })
+});
+const data = await res.json();
+```
+</RequestExample>
+
+### Response
+
+<ResponseExample>
+```json 200 OK
+{ "status": "success", "message": "Webhook URL updated successfully" }
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 400 Bad Request
+{ "error": "bad_request", "message": "Invalid webhook URL", "status": 400 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+---
+
+## GET /v1/api/config/webhook
+
+Fetch the current webhook configuration.
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+### Example request
+
+<RequestExample>
+```bash cURL
+curl -X GET 'https://edge.blooio.com/v1/api/config/webhook' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/config/webhook', {
+  headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+});
+const data = await res.json();
+```
+</RequestExample>
+
+### Response
+
+<ResponseExample>
+```json 200 OK
+{
+  "webhook_url": "https://example.com/mywebhook",
+  "updated_at": 1703123457000
+}
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+

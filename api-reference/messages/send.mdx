@@ -1,0 +1,138 @@
+---
+title: "Send a message"
+description: "Queue an outbound iMessage/SMS to a phone number. Supports idempotency and media attachments."
+---
+
+## POST /v1/api/messages
+
+<Note>
+Use the `Authorization: Bearer YOUR_API_KEY` header on all requests.
+</Note>
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+<ParamField header="Idempotency-Key" type="string">
+Optional key to ensure idempotent creation. Reusing the same key returns the original message.
+</ParamField>
+
+### Request body
+
+<ParamField body="to" type="string" required>
+Recipient phone number in E.164 format (e.g., +15551234567)
+</ParamField>
+
+<ParamField body="text" type="string">
+Text body of the message.
+</ParamField>
+
+<ParamField body="attachments" type="array[string]">
+Array of publicly accessible URLs to media attachments.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+Arbitrary key/value pairs to associate with the message.
+</ParamField>
+
+<ParamField body="api_key" type="string">
+Optional API key when not supplied via Authorization header.
+</ParamField>
+
+### Examples
+
+<RequestExample>
+```bash cURL
+curl -X POST 'https://edge.blooio.com/v1/api/messages' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: 2024-09-15-abc123' \
+  -d '{
+    "to": "+15551234567",
+    "text": "Hello world!",
+    "metadata": { "ticket_id": "TCK-123" }
+  }'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/messages', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Idempotency-Key': '2024-09-15-abc123'
+  },
+  body: JSON.stringify({
+    to: '+15551234567',
+    text: 'Hello world!',
+    metadata: { ticket_id: 'TCK-123' }
+  })
+});
+
+const data = await res.json();
+```
+</RequestExample>
+
+### Responses
+
+<ResponseExample>
+```json 202 Accepted
+{
+  "message_id": "Qm8FhbH3P7R",
+  "status": "queued"
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 200 Idempotent hit
+{
+  "message_id": "Qm8FhbH3P7R",
+  "status": "queued"
+}
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 400 Bad Request
+{ "error": "bad_request", "message": "Invalid phone number", "status": 400 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 402 Payment Required
+{ "error": "payment_required", "message": "Trial limit reached", "status": 402 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 403 Forbidden
+{ "error": "forbidden", "message": "Action not allowed for this key", "status": 403 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 409 Conflict
+{ "error": "conflict", "message": "Duplicate idempotency key", "status": 409 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 503 Service Unavailable
+{ "error": "no_active_devices", "message": "No active devices available", "status": 503 }
+```
+</ResponseExample>
+
+

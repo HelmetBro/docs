@@ -1,0 +1,42 @@
+---
+title: "Idempotency"
+description: "Safely retry message creation using Idempotency-Key headers."
+---
+
+## Why idempotency
+
+Network retries or client restarts can cause duplicate message requests. Use an `Idempotency-Key` header to ensure only one message is created.
+
+## How it works
+
+- Send a unique key per logical message attempt
+- If the same key is received again, the original message is returned with 200
+- New unique keys create a new message and return 202
+
+## Example
+
+<RequestExample>
+```bash cURL
+curl -X POST 'https://edge.blooio.com/v1/api/messages' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: checkout-1234' \
+  -d '{ "to": "+15551234567", "text": "Thanks!" }'
+```
+
+```json First response (202)
+{ "message_id": "Qm8FhbH3P7R", "status": "queued" }
+```
+
+```json Retry with same key (200)
+{ "message_id": "Qm8FhbH3P7R", "status": "queued" }
+```
+</RequestExample>
+
+## Best practices
+
+- Use a collision-resistant identifier (UUID v4)
+- Scope keys to your business action (e.g., order id)
+- Expire keys on the client side to avoid unbounded storage
+
+

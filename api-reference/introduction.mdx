@@ -1,33 +1,48 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'Blooio Messaging API'
+description: 'Send and manage iMessage/SMS via simple HTTP endpoints. All endpoints are under /v1/api and use Bearer auth.'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Overview
 
-## Welcome
+The Blooio Messaging API lets you send and receive messages over iMessage and SMS. All endpoints are prefixed with `/v1/api` and secured with a Bearer API key.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
+<CardGroup cols={2}>
+<Card title="Send messages" icon="paper-airplane" href="/api-reference/messages/send">
+Queue outbound iMessage/SMS with optional attachments and idempotency.
 </Card>
+
+<Card title="Track delivery" icon="check" href="/api-reference/messages/status">
+Fetch message status or full details.
+</Card>
+
+<Card title="Webhooks" icon="rss" href="/api-reference/webhooks/events">
+Receive inbound messages and delivery/read events.
+</Card>
+
+<Card title="Configure webhook" icon="wrench" href="/api-reference/config/webhook">
+Manage your webhook URL.
+</Card>
+
+<Card title="Account" icon="user" href="/api-reference/account/me">
+Validate your key and view plan, devices, and usage.
+</Card>
+
+<Card title="Contact capabilities" icon="bolt" href="/api-reference/contacts/capabilities">
+Check if a contact supports iMessage/SMS.
+</Card>
+</CardGroup>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+Include your API key in the `Authorization` header.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+Base URL:
+
+```bash
+https://edge.blooio.com
 ```

@@ -1,0 +1,77 @@
+---
+title: "Cancel a message"
+description: "Cancel a queued or scheduled message by ID."
+---
+
+## DELETE /v1/api/messages/{messageId}
+
+### Path parameters
+
+<ParamField path="messageId" type="string" required>
+Unique identifier for the message.
+</ParamField>
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+Bearer token in the format `Bearer YOUR_API_KEY`.
+</ParamField>
+
+### Example request
+
+<RequestExample>
+```bash cURL
+curl -X DELETE 'https://edge.blooio.com/v1/api/messages/Qm8FhbH3P7R' \
+  -H 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```javascript Node.js
+import fetch from 'node-fetch';
+
+const res = await fetch('https://edge.blooio.com/v1/api/messages/Qm8FhbH3P7R', {
+  method: 'DELETE',
+  headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+});
+const data = await res.json();
+```
+</RequestExample>
+
+### Responses
+
+<ResponseExample>
+```json 200 OK
+{
+  "message_id": "Qm8FhbH3P7R",
+  "cancelled": true,
+  "status": "cancelled",
+  "message": "Cancellation requested"
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 409 Conflict
+{
+  "message_id": "Qm8FhbH3P7R",
+  "cancelled": false,
+  "status": "sent",
+  "message": "Message already sent"
+}
+```
+</ResponseExample>
+
+#### Error responses
+
+<ResponseExample>
+```json 401 Unauthorized
+{ "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 404 Not Found
+{ "error": "not_found", "message": "Message not found", "status": 404 }
+```
+</ResponseExample>
+
+

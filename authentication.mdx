@@ -1,0 +1,37 @@
+---
+title: "Authentication"
+description: "Authenticate API requests using Bearer tokens."
+---
+
+## Overview
+
+All endpoints require an API key passed via the `Authorization` header in the format `Bearer YOUR_API_KEY`.
+
+<Warning>Never expose your API key in client-side code or public repositories.</Warning>
+
+## Example
+
+<CodeGroup>
+
+```bash cURL
+curl -H 'Authorization: Bearer YOUR_API_KEY' \
+  https://edge.blooio.com/v1/api/me
+```
+
+```javascript Node.js
+import fetch from 'node-fetch'
+
+const res = await fetch('https://edge.blooio.com/v1/api/me', {
+  headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+})
+const me = await res.json()
+```
+
+</CodeGroup>
+
+## Errors
+
+- 401 Unauthorized: missing or invalid token
+- 403 Forbidden: action not allowed for this key
+
+

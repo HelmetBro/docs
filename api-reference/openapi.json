@@ -1,217 +1,1158 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+      "title": "Blooio Messaging API (v3)",
+      "version": "1.0",
+      "description": "Public HTTP API for sending and managing iMessage/SMS messages through Blooio.\nAll endpoints are prefixed with `/v1/api` and secured with a Bearer API key.\n"
   },
   "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
+      {
+          "url": "https://edge.blooio.com",
+          "description": "Production API server"
+      }
   ],
   "security": [
-    {
-      "bearerAuth": []
-    }
+      {
+          "BearerAuth": []
+      }
+  ],
+  "tags": [
+      {
+          "name": "Messages",
+          "description": "Send and manage individual messages"
+      },
+      {
+          "name": "Batches",
+          "description": "Bulk/batch operations (stubbed)"
+      },
+      {
+          "name": "Configuration",
+          "description": "Account-level configuration"
+      },
+      {
+          "name": "Account",
+          "description": "Account and API key information"
+      },
+      {
+          "name": "Contacts",
+          "description": "Contact-related operations"
+      }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+      "/v1/api/me": {
+          "get": {
+              "tags": [
+                  "Account"
+              ],
+              "summary": "Get current API key details and validation status",
+              "description": "Returns information about the authenticated API key including plan, devices, usage statistics, and integration details.",
+              "responses": {
+                  "200": {
+                      "description": "API key details and validation status.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/ApiKeyDetails"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/Error"
+                              }
+                          }
+                      }
                   }
-                }
               }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
           }
-        }
       },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+      "/v1/api/contacts/{contact}/capabilities": {
+          "parameters": [
+              {
+                  "name": "contact",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                      "type": "string"
+                  },
+                  "description": "Phone number in E.164 format (e.g., +1234567890) or email address to check capabilities for.",
+                  "examples": {
+                      "phone": {
+                          "value": "+1234567890",
+                          "summary": "Phone number"
+                      },
+                      "email": {
+                          "value": "user@icloud.com",
+                          "summary": "Email address"
+                      }
+                  }
               }
-            }
+          ],
+          "get": {
+              "tags": [
+                  "Contacts"
+              ],
+              "summary": "Check contact capabilities",
+              "description": "Check if a phone number or email address supports iMessage, SMS, RCS, and other messaging capabilities.",
+              "responses": {
+                  "200": {
+                      "description": "Contact capabilities information.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/ContactCapabilities"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "$ref": "#/components/responses/BadRequest"
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/Error"
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      },
+      "/v1/api/messages": {
+          "post": {
+              "tags": [
+                  "Messages"
+              ],
+              "summary": "Send a single text or attachment message",
+              "description": "Queues an outbound iMessage/SMS to the specified phone number.",
+              "parameters": [
+                  {
+                      "name": "Idempotency-Key",
+                      "in": "header",
+                      "required": false,
+                      "schema": {
+                          "type": "string"
+                      },
+                      "description": "Optional key to ensure idempotent message creation. If the same key is used twice, the original message will be returned."
+                  }
+              ],
+              "requestBody": {
+                  "required": true,
+                  "content": {
+                      "application/json": {
+                          "schema": {
+                              "$ref": "#/components/schemas/SendMessageRequest"
+                          }
+                      }
+                  }
+              },
+              "responses": {
+                  "200": {
+                      "description": "Message already exists (idempotency key match).",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/QueuedResponse"
+                              }
+                          }
+                      }
+                  },
+                  "202": {
+                      "description": "Message accepted and queued for delivery.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/QueuedResponse"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "$ref": "#/components/responses/BadRequest"
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "402": {
+                      "description": "Trial limit reached or payment required.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/Error"
+                              }
+                          }
+                      }
+                  },
+                  "403": {
+                      "$ref": "#/components/responses/Forbidden"
+                  },
+                  "409": {
+                      "$ref": "#/components/responses/Conflict"
+                  },
+                  "503": {
+                      "description": "No active devices available.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/Error"
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      },
+      "/v1/api/messages/{messageId}": {
+          "parameters": [
+              {
+                  "$ref": "#/components/parameters/MessageId"
+              }
+          ],
+          "get": {
+              "tags": [
+                  "Messages"
+              ],
+              "summary": "Get message details",
+              "responses": {
+                  "200": {
+                      "description": "Message metadata and current status.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/MessageDetails"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "404": {
+                      "$ref": "#/components/responses/NotFound"
+                  }
+              }
           },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
+          "delete": {
+              "tags": [
+                  "Messages"
+              ],
+              "summary": "Cancel a queued or scheduled message",
+              "responses": {
+                  "200": {
+                      "description": "Cancellation initiated or message already in non-cancellable state.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/CancellationResponse"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "404": {
+                      "$ref": "#/components/responses/NotFound"
+                  },
+                  "409": {
+                      "description": "Message could not be cancelled (already sent or failed).",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/CancellationResponse"
+                              }
+                          }
+                      }
+                  }
               }
-            }
+          }
+      },
+      "/v1/api/messages/{messageId}/status": {
+          "parameters": [
+              {
+                  "$ref": "#/components/parameters/MessageId"
+              }
+          ],
+          "get": {
+              "tags": [
+                  "Messages"
+              ],
+              "summary": "Get current delivery status only",
+              "responses": {
+                  "200": {
+                      "description": "Current status.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/MessageStatus"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  },
+                  "404": {
+                      "$ref": "#/components/responses/NotFound"
+                  }
+              }
+          }
+      },
+      "/v1/api/config/webhook": {
+          "put": {
+              "tags": [
+                  "Configuration"
+              ],
+              "summary": "Update the webhook URL for receiving message events",
+              "description": "Configure the webhook URL that will receive all message events. Once configured, your endpoint will receive POST requests with the following event types:\n\n- `message.received` - When you receive an inbound message\n- `message.sent` - When your outbound message is sent to the carrier\n- `message.delivered` - When your outbound message is delivered to the recipient\n- `message.failed` - When your outbound message fails to deliver\n- `message.read` - When your outbound message is read by the recipient (iMessage only, recipient must have read receipts enabled)\n\nSee the webhook event schemas for detailed payload formats.\n",
+              "requestBody": {
+                  "required": true,
+                  "content": {
+                      "application/json": {
+                          "schema": {
+                              "$ref": "#/components/schemas/WebhookUpdateRequest"
+                          }
+                      }
+                  }
+              },
+              "responses": {
+                  "200": {
+                      "description": "Webhook URL updated.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "$ref": "#/components/responses/BadRequest"
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  }
+              }
           },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
+          "get": {
+              "tags": [
+                  "Configuration"
+              ],
+              "summary": "Get the current webhook URL",
+              "responses": {
+                  "200": {
+                      "description": "Current webhook URL.",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/WebhookGetResponse"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "$ref": "#/components/responses/Unauthorized"
+                  }
               }
-            }
           }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
+      },
+      "/v1/api/batches": {
+          "post": {
+              "tags": [
+                  "Batches"
+              ],
+              "summary": "Create a batch of messages (stub)",
+              "responses": {
+                  "501": {
+                      "description": "Not implemented"
+                  }
               }
-            }
           }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+      },
+      "/v1/api/batches/{batchId}": {
+          "parameters": [
+              {
+                  "$ref": "#/components/parameters/BatchId"
               }
-            }
+          ],
+          "get": {
+              "tags": [
+                  "Batches"
+              ],
+              "summary": "Get batch details (stub)",
+              "responses": {
+                  "501": {
+                      "description": "Not implemented"
+                  }
+              }
           }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+      },
+      "/v1/api/batches/{batchId}/status": {
+          "parameters": [
+              {
+                  "$ref": "#/components/parameters/BatchId"
+              }
+          ],
+          "get": {
+              "tags": [
+                  "Batches"
+              ],
+              "summary": "Get batch status (stub)",
+              "responses": {
+                  "501": {
+                      "description": "Not implemented"
+                  }
+              }
           }
-        }
+      },
+      "/v1/api/batches/{batchId}/messages": {
+          "parameters": [
+              {
+                  "$ref": "#/components/parameters/BatchId"
+              }
+          ],
+          "get": {
+              "tags": [
+                  "Batches"
+              ],
+              "summary": "List messages in a batch (stub)",
+              "responses": {
+                  "501": {
+                      "description": "Not implemented"
+                  }
+              }
+          }
       }
-    }
   },
   "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+      "securitySchemes": {
+          "BearerAuth": {
+              "type": "http",
+              "scheme": "bearer",
+              "description": "API key must be provided in the Authorization header as `Bearer YOUR_API_KEY`."
           }
-        }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "parameters": {
+          "MessageId": {
+              "name": "messageId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                  "type": "string"
+              },
+              "description": "Unique identifier for the message returned by the API."
           },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+          "BatchId": {
+              "name": "batchId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                  "type": "string"
+              },
+              "description": "Unique identifier of a batch."
+          }
+      },
+      "responses": {
+          "BadRequest": {
+              "description": "Invalid request parameters.",
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/Error"
+                      }
+                  }
               }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
           },
-          "message": {
-            "type": "string"
+          "Unauthorized": {
+              "description": "Invalid or missing API key.",
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/Error"
+                      }
+                  }
+              }
+          },
+          "Forbidden": {
+              "description": "Action not allowed for this API key.",
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/Error"
+                      }
+                  }
+              }
+          },
+          "NotFound": {
+              "description": "Resource not found.",
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/Error"
+                      }
+                  }
+              }
+          },
+          "Conflict": {
+              "description": "Conflict with current state (e.g., cannot cancel a message that already sent).",
+              "content": {
+                  "application/json": {
+                      "schema": {
+                          "$ref": "#/components/schemas/Error"
+                      }
+                  }
+              }
           }
-        }
+      },
+      "schemas": {
+          "SendMessageRequest": {
+              "type": "object",
+              "required": [
+                  "to"
+              ],
+              "properties": {
+                  "to": {
+                      "type": "string",
+                      "description": "Recipient phone number in E.164 format (e.g., +15551234567)",
+                      "example": "+15551234567"
+                  },
+                  "text": {
+                      "type": "string",
+                      "description": "Text body of the message.",
+                      "example": "Hello world!"
+                  },
+                  "attachments": {
+                      "type": "array",
+                      "description": "Array of publicly accessible URLs to media attachments.",
+                      "items": {
+                          "type": "string",
+                          "format": "uri"
+                      },
+                      "example": [
+                          "https://example.com/image.png"
+                      ]
+                  },
+                  "metadata": {
+                      "type": "object",
+                      "description": "Arbitrary key/value pairs to associate with the message."
+                  },
+                  "api_key": {
+                      "type": "string",
+                      "description": "Optional API key when not supplied via Authorization header."
+                  }
+              }
+          },
+          "QueuedResponse": {
+              "type": "object",
+              "properties": {
+                  "message_id": {
+                      "type": "string",
+                      "example": "Qm8FhbH3P7R"
+                  },
+                  "status": {
+                      "type": "string",
+                      "example": "queued"
+                  }
+              }
+          },
+          "MessageDetails": {
+              "type": "object",
+              "properties": {
+                  "message_id": {
+                      "type": "string"
+                  },
+                  "api_key": {
+                      "type": "string"
+                  },
+                  "external_id": {
+                      "type": "string",
+                      "description": "Recipient phone number."
+                  },
+                  "direction": {
+                      "type": "string",
+                      "enum": [
+                          "outbound",
+                          "inbound"
+                      ]
+                  },
+                  "text_length": {
+                      "type": "integer"
+                  },
+                  "attachments_count": {
+                      "type": "integer"
+                  },
+                  "time_sent": {
+                      "type": "integer",
+                      "description": "Unix timestamp (ms) when the message was queued/sent."
+                  },
+                  "status": {
+                      "type": "string",
+                      "description": "Current delivery status.",
+                      "enum": [
+                          "pending",
+                          "queued",
+                          "sent",
+                          "delivered",
+                          "failed",
+                          "cancelled",
+                          "cancellation_requested"
+                      ]
+                  },
+                  "metadata": {
+                      "type": "object",
+                      "description": "Original metadata provided plus system generated fields."
+                  },
+                  "protocol": {
+                      "type": "string",
+                      "description": "The protocol used to send the message (e.g., imessage, rcs, sms).",
+                      "example": "imessage"
+                  }
+              }
+          },
+          "MessageStatus": {
+              "type": "object",
+              "properties": {
+                  "message_id": {
+                      "type": "string"
+                  },
+                  "status": {
+                      "type": "string",
+                      "enum": [
+                          "pending",
+                          "queued",
+                          "sent",
+                          "delivered",
+                          "failed",
+                          "cancelled",
+                          "cancellation_requested"
+                      ]
+                  }
+              }
+          },
+          "CancellationResponse": {
+              "type": "object",
+              "properties": {
+                  "message_id": {
+                      "type": "string"
+                  },
+                  "cancelled": {
+                      "type": "boolean",
+                      "description": "True if cancellation was successful, false otherwise."
+                  },
+                  "status": {
+                      "type": "string",
+                      "description": "The current status of the message."
+                  },
+                  "current_status": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "The current status if cancellation failed (deprecated, use 'status' instead)."
+                  },
+                  "message": {
+                      "type": "string",
+                      "description": "Human-readable message about the cancellation result."
+                  }
+              }
+          },
+          "WebhookUpdateRequest": {
+              "type": "object",
+              "required": [
+                  "webhook_url"
+              ],
+              "properties": {
+                  "webhook_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://example.com/mywebhook"
+                  }
+              }
+          },
+          "WebhookUpdateResponse": {
+              "type": "object",
+              "properties": {
+                  "status": {
+                      "type": "string",
+                      "example": "success"
+                  },
+                  "message": {
+                      "type": "string",
+                      "example": "Webhook URL updated successfully"
+                  }
+              }
+          },
+          "WebhookGetResponse": {
+              "type": "object",
+              "properties": {
+                  "webhook_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true,
+                      "description": "The current webhook URL or null if not set.",
+                      "example": "https://example.com/mywebhook"
+                  },
+                  "updated_at": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Unix timestamp (ms) when the webhook URL was last updated."
+                  }
+              }
+          },
+          "Error": {
+              "type": "object",
+              "properties": {
+                  "error": {
+                      "type": "string"
+                  },
+                  "message": {
+                      "type": "string"
+                  },
+                  "status": {
+                      "type": "integer"
+                  }
+              }
+          },
+          "ApiKeyDetails": {
+              "type": "object",
+              "properties": {
+                  "valid": {
+                      "type": "boolean",
+                      "description": "Whether the API key is valid.",
+                      "example": true
+                  },
+                  "api_key": {
+                      "type": "string",
+                      "description": "The API key used for authentication.",
+                      "example": "VTAsewjhLz4KUcf3rt8tu"
+                  },
+                  "plan": {
+                      "type": "string",
+                      "description": "The plan associated with this API key.",
+                      "example": "trial"
+                  },
+                  "metadata": {
+                      "type": "object",
+                      "description": "Custom metadata associated with the API key."
+                  },
+                  "integration_details": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Integration-specific details (GHL or API integration).",
+                      "properties": {
+                          "name": {
+                              "type": "string",
+                              "description": "Name of the integration (GHL only)."
+                          },
+                          "customer_webhook_url": {
+                              "type": "string",
+                              "format": "uri",
+                              "description": "Webhook URL for API integrations."
+                          },
+                          "metadata": {
+                              "type": "object",
+                              "description": "Integration-specific metadata."
+                          }
+                      }
+                  },
+                  "devices": {
+                      "type": "array",
+                      "description": "List of devices associated with this API key.",
+                      "items": {
+                          "type": "object",
+                          "properties": {
+                              "device_hash": {
+                                  "type": "string",
+                                  "description": "Hashed device identifier."
+                              },
+                              "is_active": {
+                                  "type": "boolean",
+                                  "description": "Whether the device is currently active."
+                              },
+                              "last_active": {
+                                  "type": "integer",
+                                  "nullable": true,
+                                  "description": "Unix timestamp (ms) of last device activity."
+                              }
+                          }
+                      }
+                  },
+                  "usage": {
+                      "type": "object",
+                      "description": "Usage statistics for this API key.",
+                      "properties": {
+                          "inbound_messages": {
+                              "type": "integer",
+                              "description": "Total number of inbound messages.",
+                              "example": 42
+                          },
+                          "outbound_messages": {
+                              "type": "integer",
+                              "description": "Total number of outbound messages.",
+                              "example": 156
+                          },
+                          "last_message_sent": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "Unix timestamp (ms) of the last message sent."
+                          }
+                      }
+                  }
+              }
+          },
+          "ContactCapabilities": {
+              "type": "object",
+              "properties": {
+                  "contact": {
+                      "type": "string",
+                      "description": "The contact identifier (phone number or email).",
+                      "example": "+1234567890"
+                  },
+                  "type": {
+                      "type": "string",
+                      "enum": [
+                          "phone",
+                          "email"
+                      ],
+                      "description": "Type of contact identifier.",
+                      "example": "phone"
+                  },
+                  "capabilities": {
+                      "type": "object",
+                      "description": "Messaging capabilities for this contact.",
+                      "properties": {
+                          "imessage": {
+                              "type": "boolean",
+                              "description": "Whether this contact supports iMessage.",
+                              "example": true
+                          },
+                          "sms": {
+                              "type": "boolean",
+                              "description": "Whether this contact supports SMS (always true for phone numbers, false for emails).",
+                              "example": true
+                          }
+                      }
+                  },
+                  "lastChecked": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "ISO 8601 timestamp of when capabilities were last checked.",
+                      "example": "2024-01-01T00:00:00.000Z"
+                  }
+              }
+          },
+          "WebhookEvent": {
+              "description": "Base webhook event structure. All webhook events follow this pattern with event-specific fields added.\n\n## Event Types:\n- `message.received` - New inbound message received\n- `message.sent` - Outbound message sent to carrier\n- `message.delivered` - Outbound message delivered to recipient\n- `message.failed` - Outbound message failed to deliver\n- `message.read` - Outbound message read by recipient\n\n## Webhook Headers:\nAll webhook requests include these headers:\n- `Content-Type: application/json`\n- `X-Blooio-Event: {event_type}` - The event type (e.g., \"message.sent\")\n- `X-Blooio-Message-Id: {message_id}` - The message ID\n\n## Timing Fields:\n- `timestamp` - When the webhook was sent (present in all events)\n- `received_at` - When the inbound message was received (message.received only)\n- `sent_at` - When the outbound message was sent (message.sent only)\n- `delivered_at` - When the message was delivered (message.delivered only)\n- `read_at` - When the message was read (message.read only)\n",
+              "type": "object",
+              "required": [
+                  "event",
+                  "message_id",
+                  "external_id",
+                  "protocol",
+                  "timestamp",
+                  "device_id"
+              ],
+              "properties": {
+                  "event": {
+                      "type": "string",
+                      "enum": [
+                          "message.received",
+                          "message.sent",
+                          "message.delivered",
+                          "message.failed",
+                          "message.read"
+                      ],
+                      "description": "The type of webhook event."
+                  },
+                  "message_id": {
+                      "type": "string",
+                      "description": "Unique identifier for the message."
+                  },
+                  "external_id": {
+                      "type": "string",
+                      "description": "The phone number or email address involved in the message."
+                  },
+                  "protocol": {
+                      "type": "string",
+                      "enum": [
+                          "imessage",
+                          "sms",
+                          "rcs",
+                          "non-imessage"
+                      ],
+                      "description": "The messaging protocol used."
+                  },
+                  "timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Unix timestamp (ms) when this webhook was sent."
+                  },
+                  "device_id": {
+                      "type": "string",
+                      "description": "Hashed device identifier indicating which device handled the event."
+                  }
+              },
+              "discriminator": {
+                  "propertyName": "event",
+                  "mapping": {
+                      "message.received": "#/components/schemas/MessageReceivedWebhook",
+                      "message.sent": "#/components/schemas/MessageSentWebhook",
+                      "message.delivered": "#/components/schemas/MessageDeliveredWebhook",
+                      "message.failed": "#/components/schemas/MessageFailedWebhook",
+                      "message.read": "#/components/schemas/MessageReadWebhook"
+                  }
+              }
+          },
+          "MessageReceivedWebhook": {
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "text",
+                          "attachments",
+                          "received_at"
+                      ],
+                      "properties": {
+                          "text": {
+                              "type": "string",
+                              "description": "The text content of the received message.",
+                              "example": "Hello, I need help with my order"
+                          },
+                          "attachments": {
+                              "type": "array",
+                              "description": "Array of attachment URLs included in the message.",
+                              "items": {
+                                  "type": "string",
+                                  "format": "uri"
+                              },
+                              "example": []
+                          },
+                          "received_at": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Unix timestamp (ms) when the message was actually received by the device.",
+                              "example": 1703123456789
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.received",
+                  "message_id": "CZIsqG9ZWd9gwjIEhZpHY",
+                  "external_id": "+15551234567",
+                  "text": "Hello, I need help with my order",
+                  "attachments": [],
+                  "protocol": "imessage",
+                  "timestamp": 1703123457474,
+                  "device_id": "A1B2C3D4",
+                  "received_at": 1703123456789
+              }
+          },
+          "MessageSentWebhook": {
+              "description": "Sent when an outbound message is successfully sent to the carrier.\n\nThere are two variants of this payload:\n- Text variant (includes `text`)\n- Attachment variant (includes `attachments`)\n",
+              "oneOf": [
+                  {
+                      "$ref": "#/components/schemas/MessageSentWebhookText"
+                  },
+                  {
+                      "$ref": "#/components/schemas/MessageSentWebhookAttachment"
+                  }
+              ]
+          },
+          "MessageSentWebhookText": {
+              "description": "Sent webhook for a text message.",
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "text"
+                      ],
+                      "properties": {
+                          "text": {
+                              "type": "string",
+                              "description": "The text content of the sent message.",
+                              "example": "Thanks for contacting us! How can I help?"
+                          },
+                          "sent_at": {
+                              "type": "integer",
+                              "format": "int64",
+                              "nullable": true,
+                              "description": "Unix timestamp (ms) when the message was actually sent by the device.",
+                              "example": 1703123457370
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.sent",
+                  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+                  "external_id": "+15551234567",
+                  "protocol": "imessage",
+                  "timestamp": 1703123458158,
+                  "text": "Thanks for contacting us! How can I help?",
+                  "device_id": "A1B2C3D4",
+                  "sent_at": 1703123457370
+              }
+          },
+          "MessageSentWebhookAttachment": {
+              "description": "Sent webhook for an attachment message.",
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "attachments"
+                      ],
+                      "properties": {
+                          "attachments": {
+                              "type": "array",
+                              "description": "Array of attachment URLs.",
+                              "items": {
+                                  "type": "string",
+                                  "format": "uri"
+                              },
+                              "example": [
+                                  "https://cdn.example.com/product-image.jpg"
+                              ]
+                          },
+                          "sent_at": {
+                              "type": "integer",
+                              "format": "int64",
+                              "nullable": true,
+                              "description": "Unix timestamp (ms) when the message was actually sent by the device.",
+                              "example": 1703123458900
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.sent",
+                  "message_id": "hL3Jh_YHR3N7VlThNU0GL",
+                  "external_id": "+15551234567",
+                  "protocol": "imessage",
+                  "timestamp": 1703123459200,
+                  "attachments": [
+                      "https://cdn.example.com/product-image.jpg"
+                  ],
+                  "device_id": "A1B2C3D4",
+                  "sent_at": 1703123458900
+              }
+          },
+          "MessageDeliveredWebhook": {
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "delivered_at"
+                      ],
+                      "properties": {
+                          "delivered_at": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Unix timestamp (ms) when the message was delivered to the recipient.",
+                              "example": 1703123457563
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.delivered",
+                  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+                  "external_id": "+15551234567",
+                  "protocol": "imessage",
+                  "timestamp": 1703123460773,
+                  "device_id": "A1B2C3D4",
+                  "delivered_at": 1703123457563
+              }
+          },
+          "MessageFailedWebhook": {
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "error_code",
+                          "error_message"
+                      ],
+                      "properties": {
+                          "error_code": {
+                              "type": "string",
+                              "description": "Error code indicating the type of failure.",
+                              "example": "delivery_timeout"
+                          },
+                          "error_message": {
+                              "type": "string",
+                              "description": "Human-readable error message.",
+                              "example": "Delivery timeout"
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.failed",
+                  "message_id": "jkl012_failed_msg",
+                  "external_id": "+15551234567",
+                  "protocol": "sms",
+                  "timestamp": 1703123467000,
+                  "device_id": "A1B2C3D4",
+                  "error_code": "delivery_timeout",
+                  "error_message": "Delivery timeout"
+              }
+          },
+          "MessageReadWebhook": {
+              "allOf": [
+                  {
+                      "$ref": "#/components/schemas/WebhookEvent"
+                  },
+                  {
+                      "type": "object",
+                      "required": [
+                          "read_at"
+                      ],
+                      "properties": {
+                          "read_at": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Unix timestamp (ms) when the message was read by the recipient.",
+                              "example": 1703123468402
+                          }
+                      }
+                  }
+              ],
+              "example": {
+                  "event": "message.read",
+                  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+                  "external_id": "+15551234567",
+                  "protocol": "imessage",
+                  "timestamp": 1703123469000,
+                  "device_id": "A1B2C3D4",
+                  "read_at": 1703123468402
+              }
+          }
       }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    }
   }
 }
