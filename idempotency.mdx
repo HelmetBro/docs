@@ -39,4 +39,40 @@ curl -X POST 'https://edge.blooio.com/v1/api/messages' \
 - Scope keys to your business action (e.g., order id)
 - Expire keys on the client side to avoid unbounded storage
 
+### Node.js example
+
+```javascript
+import { randomUUID } from 'node:crypto'
+import fetch from 'node-fetch'
+
+const idempotencyKey = `order-${randomUUID()}`
+
+const res = await fetch('https://edge.blooio.com/v1/api/messages', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+    'Content-Type': 'application/json',
+    'Idempotency-Key': idempotencyKey
+  },
+  body: JSON.stringify({ to: '+15551234567', text: 'Order confirmed' })
+})
+const data = await res.json()
+```
+
+### Python example
+
+```python
+import os, uuid, requests
+
+res = requests.post('https://edge.blooio.com/v1/api/messages',
+  headers={
+    'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}",
+    'Content-Type': 'application/json',
+    'Idempotency-Key': f"order-{uuid.uuid4()}"
+  },
+  json={ 'to': '+15551234567', 'text': 'Order confirmed' }
+)
+data = res.json()
+```
+
 

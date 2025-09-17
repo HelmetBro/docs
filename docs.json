@@ -17,7 +17,8 @@
             "group": "Getting started",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "development"
             ]
           },
           {
@@ -25,6 +26,15 @@
             "pages": [
               "authentication",
               "idempotency"
+            ]
+          },
+          {
+            "group": "How-to",
+            "pages": [
+              "guides/webhooks-local",
+              "guides/attachments",
+              "guides/contact-flows",
+              "guides/error-handling"
             ]
           }
         ]
@@ -40,24 +50,38 @@
           },
           {
             "group": "Messages",
+            "openapi": "api-reference/openapi.json",
             "pages": [
-              "api-reference/messages/send",
-              "api-reference/messages/get",
-              "api-reference/messages/status",
-              "api-reference/messages/delete"
+              "POST /v1/api/messages",
+              "GET /v1/api/messages/{messageId}",
+              "GET /v1/api/messages/{messageId}/status",
+              "DELETE /v1/api/messages/{messageId}"
             ]
           },
           {
             "group": "Contacts & Account",
+            "openapi": "api-reference/openapi.json",
             "pages": [
-              "api-reference/contacts/capabilities",
-              "api-reference/account/me"
+              "GET /v1/api/contacts/{contact}/capabilities",
+              "GET /v1/api/me"
             ]
           },
           {
             "group": "Configuration",
+            "openapi": "api-reference/openapi.json",
             "pages": [
-              "api-reference/config/webhook"
+              "PUT /v1/api/config/webhook",
+              "GET /v1/api/config/webhook"
+            ]
+          },
+          {
+            "group": "Batches",
+            "openapi": "api-reference/openapi.json",
+            "pages": [
+              "POST /v1/api/batches",
+              "GET /v1/api/batches/{batchId}",
+              "GET /v1/api/batches/{batchId}/status",
+              "GET /v1/api/batches/{batchId}/messages"
             ]
           },
           {
@@ -79,6 +103,21 @@
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
+  },
+  "api": {
+    "mdx": {
+      "server": "https://edge.blooio.com",
+      "auth": {
+        "method": "bearer"
+      }
+    },
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": ["curl", "python", "javascript"],
+      "defaults": "required"
+    }
   }
   
 }

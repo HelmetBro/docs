@@ -34,6 +34,15 @@ const res = await fetch('https://edge.blooio.com/v1/api/messages/Qm8FhbH3P7R', {
 });
 const data = await res.json();
 ```
+
+```python Python
+import os, requests
+
+res = requests.delete('https://edge.blooio.com/v1/api/messages/Qm8FhbH3P7R',
+  headers={ 'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}" }
+)
+data = res.json()
+```
 </RequestExample>
 
 ### Responses
@@ -59,6 +68,10 @@ const data = await res.json();
 }
 ```
 </ResponseExample>
+
+<Info>
+The response may include a deprecated field `current_status` (string | null). Use `status` instead.
+</Info>
 
 #### Error responses
 

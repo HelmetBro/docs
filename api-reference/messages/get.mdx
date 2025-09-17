@@ -33,6 +33,15 @@ const res = await fetch('https://edge.blooio.com/v1/api/messages/gK2Ig_XGR2M6UkS
 });
 const data = await res.json();
 ```
+
+```python Python
+import os, requests
+
+res = requests.get('https://edge.blooio.com/v1/api/messages/gK2Ig_XGR2M6UkSgmT9FK',
+  headers={ 'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}" }
+)
+data = res.json()
+```
 </RequestExample>
 
 ### Response

@@ -9,6 +9,12 @@ All endpoints require an API key passed via the `Authorization` header in the fo
 
 <Warning>Never expose your API key in client-side code or public repositories.</Warning>
 
+## Base URL
+
+```
+https://edge.blooio.com
+```
+
 ## Example
 
 <CodeGroup>
@@ -28,6 +34,11 @@ const me = await res.json()
 ```
 
 </CodeGroup>
+
+## Headers
+
+- Authorization: `Bearer YOUR_API_KEY`
+- Content-Type: `application/json` (for requests with a body)
 
 ## Errors
 

@@ -1,0 +1,66 @@
+---
+title: "Send attachments"
+description: "Include media URLs when sending messages"
+---
+
+## Supported attachments
+
+Pass an array of publicly accessible URLs in the `attachments` field. Common formats: images, PDFs, and other files.
+
+## cURL
+
+```bash
+curl -X POST 'https://edge.blooio.com/v1/api/messages' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "+15551234567",
+    "attachments": [
+      "https://cdn.example.com/image.png"
+    ],
+    "metadata": { "order_id": "123" }
+  }'
+```
+
+## Node.js
+
+```javascript
+import fetch from 'node-fetch'
+
+await fetch('https://edge.blooio.com/v1/api/messages', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    to: '+15551234567',
+    attachments: ['https://cdn.example.com/image.png']
+  })
+})
+```
+
+## Python
+
+```python
+import os, requests
+
+requests.post('https://edge.blooio.com/v1/api/messages',
+  headers={
+    'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}",
+    'Content-Type': 'application/json'
+  },
+  json={
+    'to': '+15551234567',
+    'attachments': ['https://cdn.example.com/image.png']
+  }
+)
+```
+
+## Best practices
+
+- Host media on stable, publicly reachable URLs (HTTPS)
+- Prefer reasonably sized images to reduce delivery latency
+- Include `metadata` to correlate messages in your system
+
+

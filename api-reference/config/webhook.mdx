@@ -60,6 +60,10 @@ const data = await res.json();
 ```
 </ResponseExample>
 
+<Info>
+Event types include: `message.received`, `message.sent`, `message.delivered`, `message.failed`, `message.read`. See [Webhook events](/api-reference/webhooks/events).
+</Info>
+
 <ResponseExample>
 ```json 401 Unauthorized
 { "error": "unauthorized", "message": "Invalid or missing API key", "status": 401 }
@@ -106,6 +110,10 @@ const data = await res.json();
 }
 ```
 </ResponseExample>
+
+<Info>
+`webhook_url` can be null if not configured.
+</Info>
 
 #### Error responses
 

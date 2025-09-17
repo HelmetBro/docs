@@ -71,14 +71,44 @@ Unix timestamp (ms) when the device received the message.
 ```
 </ResponseExample>
 
+<ResponseExample>
+```json Attachment example
+{
+  "event": "message.received",
+  "message_id": "RX12ab34cd56",
+  "external_id": "+15559876543",
+  "text": "Here is the document.",
+  "attachments": [
+    "https://cdn.example.com/documents/contract.pdf"
+  ],
+  "protocol": "sms",
+  "timestamp": 1704123457000,
+  "device_id": "Z9Y8X7W6",
+  "received_at": 1704123456900
+}
+```
+</ResponseExample>
+
 ---
 
 ## message.sent
 
 Text variant includes `text`; attachment variant includes `attachments`.
 
+<ResponseField name="text" type="string">
+Text content of the sent message (text variant only).
+</ResponseField>
+
+<ResponseField name="attachments" type="array[string]">
+Array of attachment URLs (attachment variant only).
+</ResponseField>
+
+<ResponseField name="sent_at" type="integer">
+Unix timestamp (ms) when the message was actually sent by the device. May be null.
+</ResponseField>
+
 <ResponseExample>
-```json Text variant
+```json Example
 {
   "event": "message.sent",
   "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
@@ -93,7 +123,7 @@ Text variant includes `text`; attachment variant includes `attachments`.
 </ResponseExample>
 
 <ResponseExample>
-```json Attachment variant
+```json Attachment example
 {
   "event": "message.sent",
   "message_id": "hL3Jh_YHR3N7VlThNU0GL",
@@ -105,6 +135,21 @@ Text variant includes `text`; attachment variant includes `attachments`.
   ],
   "device_id": "A1B2C3D4",
   "sent_at": 1703123458900
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json SMS example
+{
+  "event": "message.sent",
+  "message_id": "smS12345TxT",
+  "external_id": "+15559876543",
+  "protocol": "sms",
+  "timestamp": 1704123460000,
+  "text": "Your verification code is 123456",
+  "device_id": "Z9Y8X7W6",
+  "sent_at": 1704123459900
 }
 ```
 </ResponseExample>
@@ -127,6 +172,20 @@ Unix timestamp (ms) when the message was delivered.
   "timestamp": 1703123460773,
   "device_id": "A1B2C3D4",
   "delivered_at": 1703123457563
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json SMS example
+{
+  "event": "message.delivered",
+  "message_id": "smsDELIV123",
+  "external_id": "+15559876543",
+  "protocol": "sms",
+  "timestamp": 1704123461773,
+  "device_id": "Z9Y8X7W6",
+  "delivered_at": 1704123461500
 }
 ```
 </ResponseExample>
@@ -158,6 +217,21 @@ Human-readable error message.
 ```
 </ResponseExample>
 
+<ResponseExample>
+```json Alternate error
+{
+  "event": "message.failed",
+  "message_id": "fail0987_alt",
+  "external_id": "+15559876543",
+  "protocol": "sms",
+  "timestamp": 1704123469000,
+  "device_id": "Z9Y8X7W6",
+  "error_code": "number_blocked",
+  "error_message": "Recipient has blocked messages"
+}
+```
+</ResponseExample>
+
 ---
 
 ## message.read
@@ -176,6 +250,20 @@ Unix timestamp (ms) when the message was read. iMessage only, recipient must hav
   "timestamp": 1703123469000,
   "device_id": "A1B2C3D4",
   "read_at": 1703123468402
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json Another example
+{
+  "event": "message.read",
+  "message_id": "readXY7890",
+  "external_id": "+15551230000",
+  "protocol": "imessage",
+  "timestamp": 1704123472000,
+  "device_id": "Z9Y8X7W6",
+  "read_at": 1704123471500
 }
 ```
 </ResponseExample>

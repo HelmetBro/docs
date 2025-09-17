@@ -1,0 +1,49 @@
+---
+title: "Error handling & retries"
+description: "Handle common errors, rate limits, and implement safe retries"
+---
+
+## Error schema
+
+All errors follow a standard shape: `{ error, message, status }`. See [Errors](/api-reference/errors).
+
+## Common cases
+
+- 401 Unauthorized: missing/invalid token
+- 402 Payment Required: trial limit reached
+- 403 Forbidden: action not allowed
+- 409 Conflict: duplicate idempotency key or non-cancellable message
+- 503 Service Unavailable: no active devices
+
+## Retry strategy
+
+Use an `Idempotency-Key` with exponential backoff for transient errors (5xx).
+
+```javascript
+import fetch from 'node-fetch'
+
+async function postWithRetry(url, body, { maxAttempts = 5 } = {}) {
+  let attempt = 0
+  while (attempt < maxAttempts) {
+    attempt++
+    const idempotencyKey = `retry-${Date.now()}-${attempt}`
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey
+      },
+      body: JSON.stringify(body)
+    })
+    if (res.ok) return res.json()
+    if (res.status < 500) throw new Error(`Non-retryable: ${res.status}`)
+    await new Promise(r => setTimeout(r, Math.min(1000 * 2 ** attempt, 10000)))
+  }
+  throw new Error('Max retry attempts reached')
+}
+```
+
+Persist keys client-side to dedupe across restarts.
+
+

@@ -1,25 +1,55 @@
+---
 title: "Blooio Messaging API"
-description: "Send and manage iMessage/SMS with a simple HTTP API."
+description: "Send and manage iMessage/SMS with a simple API."
 ---
 
-<Frame>
-  <img src="/images/hero-light.png" alt="Blooio Messaging API overview" />
-</Frame>
+![Blooio Messaging API overview](/images/blooio-support-banner.png)
+
+## Base URL
+
+```
+https://edge.blooio.com
+```
 
 <CardGroup cols={2}>
 <Card title="Quickstart" icon="rocket" href="/quickstart">
-Send your first message and receive webhook events in minutes.
+Get set up fast and send your first message.
 </Card>
 
-<Card title="Authentication" icon="key" href="/essentials/settings">
-Use Bearer tokens to authenticate every request.
+<Card title="Send a message" icon="paper-plane" href="/api-reference/messages/send">
+POST /v1/api/messages with text, media, metadata, and idempotency.
 </Card>
 
-<Card title="Send a message" icon="paper-airplane" href="/api-reference/messages/send">
-POST /v1/api/messages with text and media.
+<Card title="Webhook events" icon="rss" href="/api-reference/webhooks/events">
+Receive inbound, delivered, failed, and read events.
 </Card>
 
-<Card title="Webhooks" icon="rss" href="/api-reference/webhooks/events">
-Subscribe to inbound and delivery events.
+<Card title="Authentication" icon="key" href="/authentication">
+Bearer token on every request.
+</Card>
+
+<Card title="Contact capabilities" icon="bolt" href="/api-reference/contacts/capabilities">
+Check if a contact supports iMessage and SMS.
+</Card>
+
+<Card title="Errors & retries" icon="triangle-exclamation" href="/api-reference/errors">
+Standard error schema and common cases.
 </Card>
 </CardGroup>
+
+## Quick links
+
+- [Quickstart](/quickstart)
+- [Authentication](/authentication)
+- [Send a message](/api-reference/messages/send)
+- [Get message details](/api-reference/messages/get)
+- [Get message status](/api-reference/messages/status)
+- [Cancel a message](/api-reference/messages/delete)
+- [Webhook events](/api-reference/webhooks/events)
+- [Configure webhook URL](/api-reference/config/webhook)
+- [Account: Get API key details](/api-reference/account/me)
+- [Contact capabilities](/api-reference/contacts/capabilities)
+
+## About
+
+Blooio provides a simple HTTP API for sending and receiving iMessage and SMS. Use a Bearer API key to authenticate all requests. See the API Reference for request/response schemas and examples.

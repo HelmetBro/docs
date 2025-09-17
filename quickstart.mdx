@@ -1,3 +1,4 @@
+---
 title: "Quickstart"
 description: "Send your first message and receive webhooks in minutes."
 ---
@@ -7,6 +8,14 @@ description: "Send your first message and receive webhooks in minutes."
   Sign in to your Blooio account and create an API key.
   
   <Warning>Keep your API key secret. Never commit it to source control.</Warning>
+</Step>
+
+<Step title="Set your environment variable">
+  Store your API key in an environment variable for local testing.
+
+  ```bash
+  export BLOOIO_API_KEY=YOUR_API_KEY
+  ```
 </Step>
 
 <Step title="Send your first message">
@@ -36,6 +45,19 @@ description: "Send your first message and receive webhooks in minutes."
   })
   const data = await res.json()
   ```
+  
+  ```python Python
+  import os, requests
+
+  res = requests.post('https://edge.blooio.com/v1/api/messages',
+    headers={
+      'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}",
+      'Content-Type': 'application/json'
+    },
+    json={ 'to': '+15551234567', 'text': 'Hello from Blooio!' }
+  )
+  data = res.json()
+  ```
   </RequestExample>
   
   <Check>Response includes `message_id` and status `queued`.</Check>
@@ -53,7 +75,7 @@ description: "Send your first message and receive webhooks in minutes."
   ```
   </RequestExample>
   
-  <Info>See all webhook payloads in <a href="/api-reference/webhooks/events">Webhook events</a>.</Info>
+  <Info>See all webhook payloads in <a href="/api-reference/webhooks/events">Webhook events</a>. For local testing, use a tunneling tool and see <a href="/guides/webhooks-local">Receive webhooks locally</a>.</Info>
 </Step>
 
 <Step title="Track message status">
@@ -69,16 +91,16 @@ description: "Send your first message and receive webhooks in minutes."
 ## Next steps
 
 <CardGroup cols={2}>
-<Card title="Authentication" icon="key" href="/api-reference/introduction#authentication">
+<Card title="Authentication" icon="key" href="/authentication">
   Learn how to pass your Bearer token.
 </Card>
-<Card title="Idempotency" icon="recycle" href="/api-reference/messages/send">
+<Card title="Idempotency" icon="recycle" href="/idempotency">
   Ensure safe retries using `Idempotency-Key`.
 </Card>
-<Card title="Capabilities" icon="bolt" href="/api-reference/contacts/capabilities">
-  Check if a contact supports iMessage.
+<Card title="Receive webhooks locally" icon="rss" href="/guides/webhooks-local">
+  Test webhooks with a local server.
 </Card>
-<Card title="Webhooks" icon="rss" href="/api-reference/webhooks/events">
-  Handle inbound, delivery, failure, and read events.
+<Card title="Send attachments" icon="paperclip" href="/guides/attachments">
+  Include media URLs in outbound messages.
 </Card>
 </CardGroup>

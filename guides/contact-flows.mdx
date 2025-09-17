@@ -1,0 +1,53 @@
+---
+title: "Contact flows"
+description: "Check iMessage/SMS capabilities and choose the best channel"
+---
+
+Use the capabilities endpoint to decide which protocol to use.
+
+## Check capabilities
+
+```bash
+curl -H 'Authorization: Bearer YOUR_API_KEY' \
+  'https://edge.blooio.com/v1/api/contacts/%2B15551234567/capabilities'
+```
+
+Response example:
+
+```json
+{
+  "contact": "+15551234567",
+  "type": "phone",
+  "capabilities": { "imessage": true, "sms": true },
+  "lastChecked": "2024-01-01T00:00:00.000Z"
+}
+```
+
+## Send on the best channel
+
+If `imessage` is true, prefer iMessage; otherwise send SMS.
+
+```javascript
+import fetch from 'node-fetch'
+
+async function sendBest(contact, text) {
+  const capsRes = await fetch(`https://edge.blooio.com/v1/api/contacts/${encodeURIComponent(contact)}/capabilities`, {
+    headers: { 'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}` }
+  })
+  const caps = await capsRes.json()
+  const protocol = caps.capabilities?.imessage ? 'imessage' : 'sms'
+
+  return fetch('https://edge.blooio.com/v1/api/messages', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.BLOOIO_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ to: contact, text, metadata: { protocol } })
+  })
+}
+```
+
+Store the chosen protocol in `metadata` for downstream analytics.
+
+

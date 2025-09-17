@@ -137,7 +137,7 @@
                   "Messages"
               ],
               "summary": "Send a single text or attachment message",
-              "description": "Queues an outbound iMessage/SMS to the specified phone number.",
+              "description": "Queues an outbound iMessage/SMS to the specified phone number.\n\nSupports optional media attachments via public URLs, and arbitrary metadata for correlation.\n\nFor safe retries, provide an `Idempotency-Key` header. If the same key is used twice, the original message will be returned with 200; otherwise a new message is queued with 202.",
               "parameters": [
                   {
                       "name": "Idempotency-Key",
@@ -155,6 +155,11 @@
                       "application/json": {
                           "schema": {
                               "$ref": "#/components/schemas/SendMessageRequest"
+                          },
+                          "example": {
+                              "to": "+15551234567",
+                              "text": "Hello world!",
+                              "metadata": { "ticket_id": "TCK-123" }
                           }
                       }
                   }
@@ -164,9 +169,8 @@
                       "description": "Message already exists (idempotency key match).",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/QueuedResponse"
-                              }
+                              "schema": { "$ref": "#/components/schemas/QueuedResponse" },
+                              "example": { "message_id": "Qm8FhbH3P7R", "status": "queued" }
                           }
                       }
                   },
@@ -174,9 +178,8 @@
                       "description": "Message accepted and queued for delivery.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/QueuedResponse"
-                              }
+                              "schema": { "$ref": "#/components/schemas/QueuedResponse" },
+                              "example": { "message_id": "Qm8FhbH3P7R", "status": "queued" }
                           }
                       }
                   },
@@ -226,13 +229,24 @@
                   "Messages"
               ],
               "summary": "Get message details",
+              "description": "Retrieve full message metadata including direction, protocol, text length, attachments count, timestamps, current status, and original metadata.",
               "responses": {
                   "200": {
                       "description": "Message metadata and current status.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/MessageDetails"
+                              "schema": { "$ref": "#/components/schemas/MessageDetails" },
+                              "example": {
+                                  "message_id": "gK2Ig_XGR2M6UkSgmT9FK",
+                                  "api_key": "VTAsewjhLz4KUcf3rt8tu",
+                                  "external_id": "+15551234567",
+                                  "direction": "outbound",
+                                  "text_length": 23,
+                                  "attachments_count": 0,
+                                  "time_sent": 1703123457370,
+                                  "status": "delivered",
+                                  "metadata": { "ticket_id": "TCK-123" },
+                                  "protocol": "imessage"
                               }
                           }
                       }
@@ -250,13 +264,18 @@
                   "Messages"
               ],
               "summary": "Cancel a queued or scheduled message",
+              "description": "Request cancellation for a queued or scheduled message. If the message is already in a non-cancellable state (e.g., sent), the response indicates the current status. Note: response may include deprecated `current_status`; use `status` instead.",
               "responses": {
                   "200": {
                       "description": "Cancellation initiated or message already in non-cancellable state.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/CancellationResponse"
+                              "schema": { "$ref": "#/components/schemas/CancellationResponse" },
+                              "example": {
+                                  "message_id": "Qm8FhbH3P7R",
+                                  "cancelled": true,
+                                  "status": "cancelled",
+                                  "message": "Cancellation requested"
                               }
                           }
                       }
@@ -296,9 +315,8 @@
                       "description": "Current status.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/MessageStatus"
-                              }
+                              "schema": { "$ref": "#/components/schemas/MessageStatus" },
+                              "example": { "message_id": "gK2Ig_XGR2M6UkSgmT9FK", "status": "delivered" }
                           }
                       }
                   },
@@ -324,7 +342,8 @@
                       "application/json": {
                           "schema": {
                               "$ref": "#/components/schemas/WebhookUpdateRequest"
-                          }
+                          },
+                          "example": { "webhook_url": "https://example.com/mywebhook" }
                       }
                   }
               },
@@ -333,9 +352,8 @@
                       "description": "Webhook URL updated.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/WebhookUpdateResponse"
-                              }
+                              "schema": { "$ref": "#/components/schemas/WebhookUpdateResponse" },
+                              "example": { "status": "success", "message": "Webhook URL updated successfully" }
                           }
                       }
                   },
@@ -357,9 +375,8 @@
                       "description": "Current webhook URL.",
                       "content": {
                           "application/json": {
-                              "schema": {
-                                  "$ref": "#/components/schemas/WebhookGetResponse"
-                              }
+                              "schema": { "$ref": "#/components/schemas/WebhookGetResponse" },
+                              "example": { "webhook_url": "https://example.com/mywebhook", "updated_at": 1703123457000 }
                           }
                       }
                   },

@@ -38,6 +38,16 @@ const res = await fetch('https://edge.blooio.com/v1/api/contacts/%2B1234567890/c
 });
 const data = await res.json();
 ```
+
+```python Python
+import os, requests, urllib.parse
+
+contact = urllib.parse.quote('+1234567890', safe='')
+res = requests.get(f'https://edge.blooio.com/v1/api/contacts/{contact}/capabilities',
+  headers={ 'Authorization': f"Bearer {os.environ['BLOOIO_API_KEY']}" }
+)
+data = res.json()
+```
 </RequestExample>
 
 ### Response

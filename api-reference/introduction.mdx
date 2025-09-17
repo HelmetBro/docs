@@ -1,15 +1,15 @@
 ---
 title: 'Blooio Messaging API'
-description: 'Send and manage iMessage/SMS via simple HTTP endpoints. All endpoints are under /v1/api and use Bearer auth.'
+description: 'Send and manage messages via simple HTTP endpoints. All endpoints are under /v1/api and use Bearer auth.'
 ---
 
 ## Overview
 
-The Blooio Messaging API lets you send and receive messages over iMessage and SMS. All endpoints are prefixed with `/v1/api` and secured with a Bearer API key.
+The Blooio Messaging API lets you send and receive messages over iMessage, RCS, and SMS. The API automatically selects the most elevated messaging method supported by the target device - iMessage for Apple devices, RCS for supported Android devices, and SMS as a universal fallback. All endpoints are prefixed with `/v1/api` and secured with a Bearer API key.
 
 <CardGroup cols={2}>
-<Card title="Send messages" icon="paper-airplane" href="/api-reference/messages/send">
-Queue outbound iMessage/SMS with optional attachments and idempotency.
+<Card title="Send messages" icon="paper-plane" href="/api-reference/messages/send">
+Queue outbound messages with attachments and idempotency.
 </Card>
 
 <Card title="Track delivery" icon="check" href="/api-reference/messages/status">
@@ -29,7 +29,7 @@ Validate your key and view plan, devices, and usage.
 </Card>
 
 <Card title="Contact capabilities" icon="bolt" href="/api-reference/contacts/capabilities">
-Check if a contact supports iMessage/SMS.
+Check messaging capabilities for any contact.
 </Card>
 </CardGroup>
 

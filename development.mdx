@@ -1,94 +1,83 @@
 ---
 title: 'Development'
-description: 'Preview changes locally to update your docs'
+description: 'Set up a local environment to test the Blooio API and webhooks'
 ---
 
 <Info>
-  **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  <strong>Prerequisites</strong>
+  
+  - cURL or an HTTP client (Insomnia/Postman)
+  - Optional: Node.js 18+ or Python 3.9+ for examples
+  - A public HTTPS endpoint (or a tunneling tool) to receive webhooks. We recommend checking out <a href="https://webhook.site">webhook.site</a> for quick testing.
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+## Environment setup
 
-<Steps>
-<Step title="Install the Mintlify CLI">
-
-```bash
-npm i -g mint
-```
-</Step>
-
-<Step title="Preview locally">
-
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+Set your API key as an environment variable:
 
 ```bash
-mint dev
+export BLOOIO_API_KEY=YOUR_API_KEY
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+## Make test requests
 
-</Step>
-</Steps>
-
-## Custom ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+Try a simple authenticated request to validate your key:
 
 ```bash
-mint dev --port 3333
+curl -H "Authorization: Bearer $BLOOIO_API_KEY" \
+  https://edge.blooio.com/v1/api/me
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+Send a message:
 
 ```bash
-npm mint update
+curl -X POST https://edge.blooio.com/v1/api/messages \
+  -H "Authorization: Bearer $BLOOIO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: dev-$(uuidgen)" \
+  -d '{"to": "+15551234567", "text": "Hello from Blooio (dev)!"}'
 ```
 
-## Validating links
+## Receive webhooks locally
 
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
+You can test webhooks by running a local server and exposing it with a tunneling tool.
+
+1. Start a local server (Node.js example):
+
+```javascript
+// server.js
+import express from 'express'
+
+const app = express()
+app.use(express.json())
+
+app.post('/webhooks/blooio', (req, res) => {
+  console.log('Webhook:', req.headers['x-blooio-event'], req.body)
+  res.sendStatus(200)
+})
+
+app.listen(3001, () => console.log('Listening on http://localhost:3001'))
+```
+
+2. Expose your server:
 
 ```bash
-mint broken-links
+ngrok http http://localhost:3001
 ```
 
-## Deployment
+3. Point Blooio to your public URL:
 
-If the deployment is successful, you should see the following:
+```bash
+curl -X PUT https://edge.blooio.com/v1/api/config/webhook \
+  -H "Authorization: Bearer $BLOOIO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"webhook_url":"https://YOUR-NGROK-URL/webhooks/blooio"}'
+```
 
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
+See the full event payloads in [Webhook events](/api-reference/webhooks/events).
 
-## Code formatting
+## Tips for development
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
-  </Accordion>
-
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
-  </Accordion>
-</AccordionGroup>
-
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+- Use Idempotency-Key during development to avoid duplicates
+- Log response bodies and headers when debugging
+- Store timestamps (ms) from responses to correlate with webhooks

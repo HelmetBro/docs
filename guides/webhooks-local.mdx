@@ -1,0 +1,47 @@
+---
+title: "Receive webhooks locally"
+description: "Tunnel your local server and test Blooio webhook deliveries"
+---
+
+## Overview
+
+Run a local server, expose it with a tunnel (e.g., ngrok), and point Blooio to the public URL.
+
+## Start a local server
+
+```javascript server.js
+import express from 'express'
+
+const app = express()
+app.use(express.json())
+
+app.post('/webhooks/blooio', (req, res) => {
+  console.log('[Blooio]', req.headers['x-blooio-event'], req.body)
+  res.sendStatus(200)
+})
+
+app.listen(3001, () => console.log('Listening on http://localhost:3001'))
+```
+
+## Expose the server
+
+```bash
+ngrok http http://localhost:3001
+```
+
+Copy the HTTPS URL from ngrok, e.g., `https://abcd1234.ngrok.io`.
+
+## Configure your webhook URL
+
+```bash
+curl -X PUT 'https://edge.blooio.com/v1/api/config/webhook' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "webhook_url": "https://abcd1234.ngrok.io/webhooks/blooio" }'
+```
+
+## Verify deliveries
+
+You should see incoming events in your terminal. See event schemas in [Webhook events](/api-reference/webhooks/events).
+
+
